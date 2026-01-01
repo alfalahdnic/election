@@ -39,8 +39,9 @@
 
     <style>
         body {
-            background: #0f0c29;
-            background: linear-gradient(to right, #24243e, #302b63, #0f0c29);
+            background: #0f0c29;  /* fallback for old browsers */
+            background: -webkit-linear-gradient(to right, #24243e, #302b63, #0f0c29);  /* Chrome 10-25, Safari 5.1-6 */
+            background: linear-gradient(to right, #24243e, #302b63, #0f0c29); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
             min-height: 100vh;
             color: white;
             overflow-x: hidden;
@@ -49,7 +50,9 @@
         .glass-panel {
             background: rgba(255, 255, 255, 0.05);
             backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
             border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
         }
 
         .glass-card {
@@ -63,6 +66,7 @@
             transform: translateY(-5px);
             background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.1) 100%);
             border-color: rgba(255, 255, 255, 0.4);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
         }
 
         .fade-in {
@@ -74,38 +78,42 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
+        /* Hide scrollbar for clean UI */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.1);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.2);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255,255,255,0.4);
+        }
+
         .hidden-section {
             display: none;
-        }
-        
-        .sync-indicator {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            display: inline-block;
-            margin-right: 4px;
         }
     </style>
 </head>
 <body class="antialiased selection:bg-brand-pink selection:text-white">
 
-    <!-- Navbar -->
+    <!-- Navbar (Hidden on Login) -->
     <nav id="navbar" class="fixed top-0 w-full z-50 glass-panel border-b border-white/10 hidden-section">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
                 <div class="flex items-center gap-2 cursor-pointer" onclick="app.navigate('intro')">
                     <i class="fa-solid fa-bolt text-yellow-400 text-2xl"></i>
-                    <span class="font-bold text-xl tracking-wider uppercase">Linguo<span class="text-yellow-400">Electro</span></span>
+                    <span class="font-bold text-xl tracking-wider">LINGUO<span class="text-brand-purple text-yellow-400">ELECTRO</span></span>
                 </div>
-                <div class="flex items-center space-x-4">
-                    <div id="connection-status" class="text-[10px] uppercase tracking-widest text-gray-400 hidden md:block">
-                        <span class="sync-indicator bg-yellow-500" id="sync-dot"></span> <span id="sync-text">Connecting</span>
-                    </div>
+                <div class="flex space-x-4">
                     <button onclick="app.navigate('intro')" class="px-3 py-2 rounded-md text-sm font-medium hover:bg-white/10 transition-colors">
-                        <i class="fa-solid fa-house"></i>
+                        <i class="fa-solid fa-house mr-1"></i> Home
                     </button>
-                    <button onclick="app.navigate('results')" class="px-3 py-2 rounded-md text-sm font-medium bg-brand-purple hover:bg-brand-purple/80 transition-colors shadow-lg">
-                        <i class="fa-solid fa-chart-pie mr-1"></i> Results
+                    <button onclick="app.navigate('results')" class="px-3 py-2 rounded-md text-sm font-medium bg-brand-purple hover:bg-brand-purple/80 transition-colors shadow-lg shadow-purple-500/30">
+                        <i class="fa-solid fa-chart-pie mr-1"></i> Results & Analytics
                     </button>
                     <button onclick="app.logout()" class="px-3 py-2 rounded-md text-sm font-medium hover:text-red-400 transition-colors">
                         <i class="fa-solid fa-power-off"></i>
@@ -118,14 +126,18 @@
     <!-- Main Content Container -->
     <div class="relative min-h-screen flex items-center justify-center p-4 pt-20">
         
+        <!-- Background Elements -->
+        <div class="absolute top-20 left-10 w-72 h-72 bg-purple-600 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
+        <div class="absolute top-40 right-10 w-72 h-72 bg-pink-600 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
+
         <!-- 1. LOGIN PAGE -->
         <section id="page-login" class="w-full max-w-md fade-in">
             <div class="glass-panel p-8 rounded-2xl text-center">
                 <div class="mb-6 inline-block p-4 rounded-full bg-white/5 border border-white/10">
                     <i class="fa-solid fa-lock text-4xl text-brand-pink"></i>
                 </div>
-                <h1 class="text-3xl font-bold mb-2 tracking-tight">Portal Locked</h1>
-                <p class="text-gray-400 mb-8 text-sm">Authorized Election Personnel Only</p>
+                <h1 class="text-3xl font-bold mb-2">Portal Locked</h1>
+                <p class="text-gray-400 mb-8 text-sm">Enter credentials to access the election module.</p>
                 
                 <form onsubmit="app.handleLogin(event)" class="space-y-4">
                     <div class="relative">
@@ -136,10 +148,10 @@
                         <i class="fa-solid fa-key absolute left-4 top-3.5 text-gray-500"></i>
                         <input type="password" id="password" placeholder="Password" class="w-full bg-black/20 border border-white/10 rounded-lg py-3 pl-10 pr-4 focus:outline-none focus:border-brand-purple transition-colors text-white placeholder-gray-500">
                     </div>
-                    <button type="submit" class="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold py-3 rounded-lg shadow-lg transform transition active:scale-95">
+                    <button type="submit" class="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold py-3 rounded-lg shadow-lg transform transition hover:scale-[1.02] duration-200">
                         Access Console
                     </button>
-                    <p id="login-error" class="text-red-400 text-xs mt-2 hidden"><i class="fa-solid fa-circle-exclamation mr-1"></i> Invalid Credentials</p>
+                    <p id="login-error" class="text-red-400 text-xs mt-2 hidden"><i class="fa-solid fa-circle-exclamation mr-1"></i> Invalid credentials</p>
                 </form>
             </div>
         </section>
@@ -150,29 +162,45 @@
                 LINGUO ELECTRO
             </h1>
             <p class="text-xl md:text-2xl text-gray-300 mb-12 max-w-2xl mx-auto font-light">
-                Digital Voting Terminal for Language Wing Election. Secure, Transparent, Real-time.
+                Welcome to the Language Wing Annual Election. Exercise your democratic right with our secure, digital voting terminal.
             </p>
-            <button onclick="app.navigate('voter-details')" class="group px-8 py-4 bg-white text-black font-bold text-lg rounded-full transition-all hover:shadow-[0_0_40px_rgba(255,255,255,0.3)]">
-                Start Voting <i class="fa-solid fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
-            </button>
+            <div class="flex justify-center gap-6">
+                <button onclick="app.navigate('voter-details')" class="group relative px-8 py-4 bg-white text-black font-bold text-lg rounded-full overflow-hidden transition-all hover:shadow-[0_0_40px_rgba(255,255,255,0.3)]">
+                    <span class="relative z-10 flex items-center">
+                        Start Voting <i class="fa-solid fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
+                    </span>
+                </button>
+            </div>
         </section>
 
         <!-- 3. VOTER DETAILS PAGE -->
         <section id="page-voter-details" class="w-full max-w-lg hidden-section fade-in">
             <div class="glass-panel p-8 rounded-2xl">
-                <h2 class="text-2xl font-bold mb-6">Voter Verification</h2>
+                <div class="flex items-center gap-3 mb-6 border-b border-white/10 pb-4">
+                    <div class="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400">
+                        <i class="fa-solid fa-id-card"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-bold">Voter Verification</h2>
+                        <p class="text-xs text-gray-400">Step 1 of 2</p>
+                    </div>
+                </div>
+
                 <form onsubmit="app.saveVoterDetails(event)" class="space-y-5">
                     <div>
                         <label class="block text-sm font-medium text-gray-300 mb-2">Voter ID</label>
-                        <input type="text" id="voter-id" required class="w-full bg-black/20 border border-white/10 rounded-lg p-3 outline-none focus:border-blue-500">
+                        <input type="text" id="voter-id" required class="w-full bg-black/20 border border-white/10 rounded-lg p-3 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors outline-none" placeholder="Ex: V-2024-001">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-300 mb-2">Admission No (Ad.No)</label>
-                        <input type="number" id="voter-ad" required class="w-full bg-black/20 border border-white/10 rounded-lg p-3 outline-none focus:border-blue-500">
+                        <input type="number" id="voter-ad" required class="w-full bg-black/20 border border-white/10 rounded-lg p-3 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors outline-none" placeholder="Ex: 4452">
                     </div>
+                    
                     <div class="pt-4 flex gap-3">
-                        <button type="button" onclick="app.navigate('intro')" class="flex-1 py-3 rounded-lg border border-white/10 text-gray-400">Cancel</button>
-                        <button type="submit" class="flex-[2] bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-lg">Proceed</button>
+                        <button type="button" onclick="app.navigate('intro')" class="flex-1 py-3 rounded-lg border border-white/10 hover:bg-white/5 transition-colors text-gray-400">Cancel</button>
+                        <button type="submit" class="flex-[2] bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-lg transition-colors shadow-lg shadow-blue-500/20">
+                            Verify & Proceed
+                        </button>
                     </div>
                 </form>
             </div>
@@ -181,86 +209,101 @@
         <!-- 4. VOTING PAGE -->
         <section id="page-voting" class="w-full max-w-6xl hidden-section fade-in">
             <div class="text-center mb-10">
-                <h2 class="text-3xl font-bold mb-2">Ballot Box</h2>
-                <p class="text-gray-400">Select your candidate of choice.</p>
+                <h2 class="text-3xl font-bold mb-2">Cast Your Vote</h2>
+                <p class="text-gray-400">Select one candidate below. This action cannot be undone.</p>
             </div>
-            <div id="ballot-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"></div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Candidates generated by JS -->
+                <div id="ballot-container" class="contents"></div>
+            </div>
+            
+            <div class="mt-12 text-center">
+                <button onclick="app.navigate('voter-details')" class="text-gray-500 hover:text-white text-sm transition-colors">
+                    <i class="fa-solid fa-arrow-left mr-1"></i> Cancel & Return
+                </button>
+            </div>
         </section>
 
-        <!-- 5. RESULTS PAGE -->
+        <!-- 5. RESULTS & ANALYTICS PAGE -->
         <section id="page-results" class="w-full max-w-7xl hidden-section fade-in pb-10">
             <div class="mb-8 flex flex-col md:flex-row justify-between items-end border-b border-white/10 pb-6">
                 <div>
-                    <h2 class="text-4xl font-bold text-white mb-2">Live Statistics</h2>
-                    <p class="text-gray-400">Cloud-Synced Voting Data</p>
+                    <h2 class="text-4xl font-bold text-white mb-2">Election Analytics</h2>
+                    <p class="text-gray-400">Real-time data visualization and logs</p>
                 </div>
-                <div class="mt-4 md:mt-0 bg-white/5 px-6 py-3 rounded-xl border border-white/10 text-center">
-                    <span class="text-gray-400 text-xs uppercase">Total Votes Cast</span>
+                <div class="mt-4 md:mt-0 bg-white/5 px-6 py-3 rounded-xl border border-white/10">
+                    <span class="text-gray-400 text-sm uppercase tracking-wider">Total Votes</span>
                     <div class="text-3xl font-black text-white" id="total-votes-display">0</div>
                 </div>
             </div>
 
+            <!-- Stats Grid -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-                <div class="lg:col-span-2 glass-panel p-6 rounded-2xl h-80">
-                    <canvas id="voteChart"></canvas>
+                <!-- Chart Section -->
+                <div class="lg:col-span-2 glass-panel p-6 rounded-2xl">
+                    <h3 class="text-lg font-bold mb-4 flex items-center">
+                        <i class="fa-solid fa-chart-simple mr-2 text-brand-purple"></i> Vote Distribution
+                    </h3>
+                    <div class="relative h-64 w-full">
+                        <canvas id="voteChart"></canvas>
+                    </div>
                 </div>
-                <div id="stats-cards-container" class="space-y-3"></div>
+
+                <!-- Leaderboard Cards -->
+                <div class="space-y-4">
+                    <h3 class="text-lg font-bold mb-4 text-gray-300">Live Count</h3>
+                    <div id="stats-cards-container" class="space-y-3">
+                        <!-- Injected via JS -->
+                    </div>
+                </div>
             </div>
 
+            <!-- Voter Log Table -->
             <div class="glass-panel rounded-2xl overflow-hidden">
-                <div class="p-6 border-b border-white/10 flex justify-between items-center bg-black/20">
-                    <h3 class="text-lg font-bold">Voter Registry Log</h3>
-                    <button onclick="app.clearData()" class="text-[10px] text-red-400 uppercase tracking-tighter border border-red-500/30 px-2 py-1 rounded hover:bg-red-500/10">Wipe Database</button>
+                <div class="p-6 border-b border-white/10 flex justify-between items-center">
+                    <h3 class="text-lg font-bold">Voter Registry</h3>
+                    <button onclick="app.clearData()" class="text-xs text-red-400 hover:text-red-300 border border-red-500/30 px-3 py-1 rounded hover:bg-red-500/10">Reset All Data</button>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-left">
-                        <thead class="bg-black/40 text-gray-500 text-xs uppercase">
+                        <thead class="bg-black/20 text-gray-400 text-xs uppercase">
                             <tr>
                                 <th class="px-6 py-4">Time</th>
                                 <th class="px-6 py-4">Voter ID</th>
                                 <th class="px-6 py-4">Ad. No</th>
-                                <th class="px-6 py-4">Verification</th>
+                                <th class="px-6 py-4">Status</th>
                             </tr>
                         </thead>
-                        <tbody id="voter-table-body" class="divide-y divide-white/5 text-sm text-gray-300"></tbody>
+                        <tbody id="voter-table-body" class="divide-y divide-white/5 text-sm text-gray-300">
+                            <!-- Injected via JS -->
+                        </tbody>
                     </table>
                 </div>
             </div>
         </section>
+
     </div>
 
-    <!-- Success Modal -->
+    <!-- Thank You Modal -->
     <div id="modal-success" class="fixed inset-0 z-[100] flex items-center justify-center hidden">
-        <div class="absolute inset-0 bg-black/90 backdrop-blur-md"></div>
-        <div class="relative bg-gray-900 border border-green-500/30 p-8 rounded-3xl max-w-sm w-full text-center shadow-2xl">
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" onclick="app.closeModal()"></div>
+        <div class="relative bg-gradient-to-br from-gray-900 to-black border border-green-500/30 p-8 rounded-2xl max-w-sm w-full text-center shadow-2xl shadow-green-900/20 transform transition-all scale-100">
             <div class="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
                 <i class="fa-solid fa-check text-4xl text-green-500"></i>
             </div>
-            <h3 class="text-2xl font-bold text-white mb-2">Success!</h3>
-            <p class="text-gray-400 mb-8">Your vote has been securely uploaded to the cloud.</p>
-            <button onclick="app.closeModal()" class="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-3 rounded-xl transition-colors">
-                New Voter
+            <h3 class="text-2xl font-bold text-white mb-2">Vote Submitted!</h3>
+            <p class="text-gray-400 mb-8">Thank you for participating in the election.</p>
+            <button onclick="app.closeModal()" class="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-3 rounded-lg transition-colors">
+                Return to Home
             </button>
         </div>
     </div>
 
-    <script type="module">
-        // --- FIREBASE IMPORTS ---
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, doc, addDoc, onSnapshot, deleteDoc, getDocs, writeBatch, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        // --- CONFIGURATION ---
-        const apiKey = "AKfycbxGIM-VnEEq0hCcAIw0KF5G6QTwWZ7YrGExKY5fn_gEAwxlrafQUeanv3LVA5jb8xgk"; // <--- PASTE YOUR DEPLOY KEY HERE
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'linguo-electro-v1';
-        const firebaseConfig = JSON.parse(__firebase_config);
-
+    <script>
         const app = {
-            db: null,
-            auth: null,
-            user: null,
             candidates: [
-                { id: 'sinan', name: 'Sinan K', icon: 'fa-fire-extinguisher', symbol: 'Gas Cylinder', color: '#ef4444' },
+                { id: 'sinan', name: 'Sinan K', icon: 'fa-fire-extinguisher', symbol: 'Gas Cylinder', color: '#ef4444' }, // Fire Extinguisher looks like a cylinder
                 { id: 'jalal', name: 'Jalal', icon: 'fa-mobile-screen-button', symbol: 'Mobile Phone', color: '#3b82f6' },
                 { id: 'rayyan', name: 'Rayyan', icon: 'fa-futbol', symbol: 'Football', color: '#10b981' },
                 { id: 'ameer', name: 'Ameer Ali', icon: 'fa-cube', symbol: "Rubik's Cube", color: '#f59e0b' }
@@ -268,226 +311,270 @@
             currentVoter: null,
             chartInstance: null,
 
-            async init() {
-                try {
-                    const fbApp = initializeApp(firebaseConfig);
-                    this.auth = getAuth(fbApp);
-                    this.db = getFirestore(fbApp);
-
-                    // Auth Rule 3
-                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                        await signInWithCustomToken(this.auth, __initial_auth_token);
-                    } else {
-                        await signInAnonymously(this.auth);
-                    }
-
-                    onAuthStateChanged(this.auth, (u) => {
-                        this.user = u;
-                        if (u) {
-                            document.getElementById('sync-dot').className = "sync-indicator bg-green-500";
-                            document.getElementById('sync-text').innerText = "Cloud Active";
-                            this.checkLoginStatus();
-                            this.renderCandidates();
-                        }
-                    });
-
-                } catch (e) {
-                    console.error("Firebase Error", e);
-                    document.getElementById('sync-text').innerText = "Offline";
-                }
+            // Initialize
+            init: function() {
+                this.checkLoginStatus();
+                this.renderCandidates();
             },
 
-            navigate(pageId) {
+            // Navigation
+            navigate: function(pageId) {
+                // Security check
                 if (!localStorage.getItem('linguo_auth') && pageId !== 'login') {
                     this.showSection('login');
                     return;
                 }
-                
+
+                // If going to results, refresh data
+                if (pageId === 'results') {
+                    this.loadResults();
+                }
+
                 this.showSection(pageId);
-                const nav = document.getElementById('navbar');
-                pageId === 'login' ? nav.classList.add('hidden-section') : nav.classList.remove('hidden-section');
                 
-                if (pageId === 'results') this.setupResultsListener();
+                // Show/Hide Navbar
+                const nav = document.getElementById('navbar');
+                if (pageId === 'login') {
+                    nav.classList.add('hidden-section');
+                } else {
+                    nav.classList.remove('hidden-section');
+                }
             },
 
-            showSection(id) {
-                document.querySelectorAll('section').forEach(el => el.classList.add('hidden-section'));
-                document.getElementById('page-' + id).classList.remove('hidden-section');
+            showSection: function(id) {
+                document.querySelectorAll('section').forEach(el => {
+                    el.classList.add('hidden-section');
+                    el.classList.remove('fade-in');
+                });
+                const target = document.getElementById('page-' + id);
+                target.classList.remove('hidden-section');
+                // Trigger reflow to restart animation
+                void target.offsetWidth; 
+                target.classList.add('fade-in');
             },
 
-            handleLogin(e) {
+            // Auth
+            handleLogin: function(e) {
                 e.preventDefault();
                 const u = document.getElementById('username').value;
                 const p = document.getElementById('password').value;
-                if (u === 'admin' && p === '633913') {
+
+                // Simple mock encryption/auth
+                if (u === 'alfalahdnic' && p === '633913') {
                     localStorage.setItem('linguo_auth', 'true');
+                    document.getElementById('login-error').classList.add('hidden');
                     this.navigate('intro');
                 } else {
                     document.getElementById('login-error').classList.remove('hidden');
                 }
             },
 
-            logout() {
+            logout: function() {
                 localStorage.removeItem('linguo_auth');
                 this.navigate('login');
             },
 
-            checkLoginStatus() {
-                localStorage.getItem('linguo_auth') ? this.navigate('intro') : this.navigate('login');
+            checkLoginStatus: function() {
+                if (localStorage.getItem('linguo_auth')) {
+                    this.navigate('intro');
+                } else {
+                    this.navigate('login');
+                }
             },
 
-            saveVoterDetails(e) {
+            // Voter Details
+            saveVoterDetails: function(e) {
                 e.preventDefault();
-                this.currentVoter = {
-                    id: document.getElementById('voter-id').value,
-                    ad: document.getElementById('voter-ad').value
-                };
-                this.navigate('voting');
+                const id = document.getElementById('voter-id').value;
+                const ad = document.getElementById('voter-ad').value;
+
+                if(id && ad) {
+                    this.currentVoter = { id, ad };
+                    // Reset form
+                    document.getElementById('voter-id').value = '';
+                    document.getElementById('voter-ad').value = '';
+                    this.navigate('voting');
+                }
             },
 
-            renderCandidates() {
+            // Rendering
+            renderCandidates: function() {
                 const container = document.getElementById('ballot-container');
                 container.innerHTML = this.candidates.map(c => `
-                    <div class="glass-card rounded-3xl p-6 text-center group cursor-pointer" onclick="window.castVote('${c.id}')">
-                        <div class="w-20 h-20 rounded-full bg-white/5 mx-auto mb-4 flex items-center justify-center border border-white/10 group-hover:bg-white/20 transition-all">
-                            <i class="fa-solid ${c.icon} text-3xl text-white"></i>
+                    <div class="glass-card rounded-2xl p-6 relative group overflow-hidden">
+                        <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-${c.color}-500 to-transparent opacity-50"></div>
+                        <div class="flex flex-col items-center text-center z-10 relative">
+                            <div class="w-24 h-24 rounded-full bg-white/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300 border border-white/10 shadow-[0_0_15px_rgba(255,255,255,0.1)]">
+                                <i class="${c.icon} text-4xl text-white"></i>
+                            </div>
+                            <h3 class="text-xl font-bold mb-1">${c.name}</h3>
+                            <span class="text-xs font-semibold px-3 py-1 bg-white/10 rounded-full text-gray-300 mb-6">
+                                ${c.symbol}
+                            </span>
+                            <button onclick="app.vote('${c.id}')" class="w-full bg-white text-black font-bold py-3 rounded-lg hover:bg-gray-200 transition-colors shadow-lg">
+                                VOTE
+                            </button>
                         </div>
-                        <h3 class="text-xl font-bold">${c.name}</h3>
-                        <p class="text-xs text-gray-500 mt-1 uppercase tracking-widest">${c.symbol}</p>
-                        <button class="mt-6 w-full py-2 bg-white text-black text-xs font-black rounded-lg">SELECT</button>
                     </div>
                 `).join('');
             },
 
-            async vote(candidateId) {
-                if (!this.currentVoter || !this.user) return;
-
-                try {
-                    // Auth Rule 1: Strict Paths
-                    const votesCol = collection(this.db, 'artifacts', appId, 'public', 'data', 'votes');
-                    await addDoc(votesCol, {
-                        voterId: this.currentVoter.id,
-                        adNo: this.currentVoter.ad,
-                        candidateId: candidateId,
-                        timestamp: serverTimestamp()
-                    });
-
-                    this.currentVoter = null;
-                    document.getElementById('voter-id').value = '';
-                    document.getElementById('voter-ad').value = '';
-                    document.getElementById('modal-success').classList.remove('hidden');
-                } catch (e) {
-                    alert("Sync Error: " + e.message);
+            // Voting Logic
+            vote: function(candidateId) {
+                if (!this.currentVoter) {
+                    alert("Session error. Please enter details again.");
+                    this.navigate('voter-details');
+                    return;
                 }
+
+                // 1. Get existing data
+                let votes = JSON.parse(localStorage.getItem('linguo_votes')) || {};
+                let registry = JSON.parse(localStorage.getItem('linguo_registry')) || [];
+
+                // 2. Update Counts
+                votes[candidateId] = (votes[candidateId] || 0) + 1;
+
+                // 3. Update Registry
+                registry.push({
+                    voterId: this.currentVoter.id,
+                    adNo: this.currentVoter.ad,
+                    candidateId: candidateId,
+                    timestamp: new Date().toISOString()
+                });
+
+                // 4. Save to LocalStorage
+                localStorage.setItem('linguo_votes', JSON.stringify(votes));
+                localStorage.setItem('linguo_registry', JSON.stringify(registry));
+
+                // 5. Clear session and Show Modal
+                this.currentVoter = null;
+                document.getElementById('modal-success').classList.remove('hidden');
             },
 
-            closeModal() {
+            closeModal: function() {
                 document.getElementById('modal-success').classList.add('hidden');
                 this.navigate('intro');
             },
 
-            // --- REALTIME RESULTS ---
-            setupResultsListener() {
-                if (!this.user) return;
-                const votesCol = collection(this.db, 'artifacts', appId, 'public', 'data', 'votes');
-                
-                // Rule 2: Simple query, filter in memory
-                onSnapshot(votesCol, (snapshot) => {
-                    const data = [];
-                    const counts = {};
-                    this.candidates.forEach(c => counts[c.id] = 0);
+            // Admin / Results Logic
+            loadResults: function() {
+                const votes = JSON.parse(localStorage.getItem('linguo_votes')) || {};
+                const registry = JSON.parse(localStorage.getItem('linguo_registry')) || [];
 
-                    snapshot.forEach(doc => {
-                        const item = doc.data();
-                        data.push(item);
-                        if (counts[item.candidateId] !== undefined) {
-                            counts[item.candidateId]++;
-                        }
-                    });
-
-                    this.updateResultsUI(data, counts);
-                }, (err) => console.error("Snapshot error", err));
-            },
-
-            updateResultsUI(allVotes, counts) {
-                const total = allVotes.length;
+                // Calculate Totals
+                const total = Object.values(votes).reduce((a, b) => a + b, 0);
                 document.getElementById('total-votes-display').innerText = total;
 
-                // Stats Cards
-                const container = document.getElementById('stats-cards-container');
-                container.innerHTML = this.candidates.map(c => {
-                    const count = counts[c.id] || 0;
-                    const pct = total > 0 ? Math.round((count/total)*100) : 0;
+                // 1. Render Stats Cards
+                const statsContainer = document.getElementById('stats-cards-container');
+                statsContainer.innerHTML = this.candidates.map(c => {
+                    const count = votes[c.id] || 0;
+                    const percent = total > 0 ? Math.round((count / total) * 100) : 0;
                     return `
-                        <div class="glass-panel p-4 rounded-xl flex items-center justify-between border-l-4" style="border-left-color: ${c.color}">
-                            <div>
-                                <h4 class="font-bold text-sm">${c.name}</h4>
-                                <div class="text-[10px] text-gray-500">${pct}% of total</div>
+                        <div class="glass-panel p-4 rounded-xl flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center">
+                                    <i class="${c.icon} text-lg text-white"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-sm">${c.name}</h4>
+                                    <div class="w-24 h-1.5 bg-gray-700 rounded-full mt-1 overflow-hidden">
+                                        <div class="h-full bg-[${c.color}]" style="width: ${percent}%; background-color: ${c.color}"></div>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="text-2xl font-black">${count}</div>
+                            <div class="text-right">
+                                <div class="text-2xl font-bold">${count}</div>
+                                <div class="text-xs text-gray-400">Votes</div>
+                            </div>
                         </div>
                     `;
                 }).join('');
 
-                // Table
+                // 2. Render Table (Latest first)
                 const tbody = document.getElementById('voter-table-body');
-                const sorted = [...allVotes].sort((a,b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
-                tbody.innerHTML = sorted.map(v => `
-                    <tr>
-                        <td class="px-6 py-4 text-xs font-mono text-gray-500">${v.timestamp ? new Date(v.timestamp.seconds*1000).toLocaleTimeString() : '...'}</td>
-                        <td class="px-6 py-4 font-bold text-white">${v.voterId}</td>
-                        <td class="px-6 py-4 text-gray-400">${v.adNo}</td>
-                        <td class="px-6 py-4"><span class="text-green-400 text-[10px] font-bold">✓ SYNCED</span></td>
+                tbody.innerHTML = registry.slice().reverse().map(r => `
+                    <tr class="hover:bg-white/5 transition-colors">
+                        <td class="px-6 py-4 text-gray-400 font-mono text-xs">${new Date(r.timestamp).toLocaleTimeString()}</td>
+                        <td class="px-6 py-4 font-medium text-white">${r.voterId}</td>
+                        <td class="px-6 py-4 text-gray-300">${r.adNo}</td>
+                        <td class="px-6 py-4"><span class="px-2 py-1 bg-green-500/20 text-green-400 text-xs rounded-full">Voted</span></td>
                     </tr>
                 `).join('');
 
-                this.renderChart(counts);
+                // 3. Render Chart
+                this.renderChart(votes);
             },
 
-            renderChart(counts) {
+            renderChart: function(votes) {
                 const ctx = document.getElementById('voteChart').getContext('2d');
-                const data = this.candidates.map(c => counts[c.id]);
-                if (this.chartInstance) this.chartInstance.destroy();
+                const data = this.candidates.map(c => votes[c.id] || 0);
+                const labels = this.candidates.map(c => c.name);
+                const colors = this.candidates.map(c => c.color);
+
+                if (this.chartInstance) {
+                    this.chartInstance.destroy();
+                }
+
+                Chart.defaults.color = '#9ca3af';
+                Chart.defaults.font.family = 'Outfit';
 
                 this.chartInstance = new Chart(ctx, {
                     type: 'bar',
                     data: {
-                        labels: this.candidates.map(c => c.name),
+                        labels: labels,
                         datasets: [{
+                            label: 'Votes',
                             data: data,
-                            backgroundColor: this.candidates.map(c => c.color),
-                            borderRadius: 10
+                            backgroundColor: colors,
+                            borderRadius: 6,
+                            borderWidth: 0,
+                            barThickness: 40
                         }]
                     },
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
-                        plugins: { legend: { display: false } },
+                        plugins: {
+                            legend: { display: false }
+                        },
                         scales: {
-                            y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' } },
-                            x: { grid: { display: false } }
+                            y: {
+                                beginAtZero: true,
+                                grid: { color: 'rgba(255, 255, 255, 0.05)' }
+                            },
+                            x: {
+                                grid: { display: false }
+                            }
                         }
                     }
                 });
             },
 
-            async clearData() {
-                if (!confirm("This will permanently delete all votes in the cloud. Continue?")) return;
-                try {
-                    const votesCol = collection(this.db, 'artifacts', appId, 'public', 'data', 'votes');
-                    const snapshot = await getDocs(votesCol);
-                    const batch = writeBatch(this.db);
-                    snapshot.forEach(d => batch.delete(d.ref));
-                    await batch.commit();
-                } catch (e) {
-                    alert("Delete failed: " + e.message);
+            clearData: function() {
+                if(confirm('Are you sure you want to delete all election data? This cannot be undone.')) {
+                    localStorage.removeItem('linguo_votes');
+                    localStorage.removeItem('linguo_registry');
+                    this.loadResults();
                 }
             }
         };
 
-        window.castVote = (id) => app.vote(id);
-        window.app = app;
-        document.addEventListener('DOMContentLoaded', () => app.init());
+        // Start App
+        document.addEventListener('DOMContentLoaded', () => {
+            app.init();
+        });
+
+        // Add extra animations for inputs
+        const inputs = document.querySelectorAll('input');
+        inputs.forEach(input => {
+            input.addEventListener('focus', () => {
+                input.parentElement.classList.add('scale-[1.02]');
+            });
+            input.addEventListener('blur', () => {
+                input.parentElement.classList.remove('scale-[1.02]');
+            });
+        });
     </script>
 </body>
 </html>
