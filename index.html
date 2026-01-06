@@ -188,7 +188,7 @@
                 <!-- Right Side: Team Cards -->
                 <div class="lg:col-span-4 flex flex-col gap-4 h-[450px]">
                     <h3 class="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 px-1">Standings</h3>
-                    <div id="stats-cards-container" class="flex flex-col gap-4 flex-grow">
+                    <div id="stats-cards-container" class="flex flex-col gap-3 flex-grow overflow-y-auto custom-scroll pr-2">
                         <!-- Rendered via JS -->
                     </div>
                 </div>
@@ -197,20 +197,22 @@
             <!-- Bottom: Registry -->
             <div class="glass-panel rounded-2xl overflow-hidden mt-6">
                 <div class="px-6 py-4 border-b border-white/10 flex justify-between items-center bg-white/5">
-                    <h3 class="text-sm font-bold uppercase tracking-widest text-white/80 italic">Verified Audit Registry</h3>
+                    <h3 class="text-sm font-bold uppercase tracking-widest text-white/80 italic">Full Audit Registry</h3>
                     <button onclick="app.clearData()" class="text-[9px] text-red-500/30 hover:text-red-500 font-bold uppercase transition-colors">Emergency Clear</button>
                 </div>
-                <div class="max-h-[250px] overflow-y-auto custom-scroll">
+                <div class="max-h-[350px] overflow-y-auto custom-scroll">
                     <table class="w-full text-left text-xs">
-                        <thead class="sticky top-0 bg-brand-dark/95 backdrop-blur text-gray-500 uppercase text-[9px] tracking-widest">
+                        <thead class="sticky top-0 bg-brand-dark/95 backdrop-blur text-gray-500 uppercase text-[9px] tracking-widest z-10">
                             <tr>
                                 <th class="px-6 py-4">Timestamp</th>
-                                <th class="px-6 py-4">Voter ID / Name</th>
+                                <th class="px-6 py-4">Voter Name / ID</th>
                                 <th class="px-6 py-4">Admission No</th>
                                 <th class="px-6 py-4">Status</th>
                             </tr>
                         </thead>
-                        <tbody id="voter-table-body" class="divide-y divide-white/5 bg-white/[0.02]"></tbody>
+                        <tbody id="voter-table-body" class="divide-y divide-white/5 bg-white/[0.02]">
+                            <!-- All saved records will appear here -->
+                        </tbody>
                     </table>
                 </div>
             </div>
@@ -298,13 +300,14 @@
 
             vote: function(candidateId) {
                 if (!this.currentVoter) return this.navigate('voter-details');
+                
                 let votes = JSON.parse(localStorage.getItem('linguo_votes')) || {};
                 let registry = JSON.parse(localStorage.getItem('linguo_registry')) || [];
                 
-                // Track Vote
+                // Record the vote
                 votes[candidateId] = (votes[candidateId] || 0) + 1;
                 
-                // Track Registry Item
+                // Add to registry (using current voter details)
                 registry.push({ 
                     voterId: this.currentVoter.id, 
                     adNo: this.currentVoter.ad, 
@@ -333,8 +336,8 @@
                             data: [0,0,0,0], 
                             backgroundColor: this.candidates.map(c => c.color), 
                             borderRadius: 12,
-                            barPercentage: 0.7, 
-                            categoryPercentage: 0.8
+                            barPercentage: 0.8, // Fat bars
+                            categoryPercentage: 0.9
                         }]
                     },
                     options: {
@@ -343,7 +346,7 @@
                         plugins: { legend: { display: false } },
                         scales: { 
                             y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { display: false }, border: { display: false } }, 
-                            x: { ticks: { color: '#94a3b8', font: { weight: '800', size: 12 } }, grid: { display: false } } 
+                            x: { ticks: { color: '#ffffff', font: { weight: '800', size: 12 } }, grid: { display: false } } 
                         }
                     }
                 });
@@ -416,19 +419,35 @@
 
             renderRegistry: function() {
                 const reg = JSON.parse(localStorage.getItem('linguo_registry')) || [];
-                document.getElementById('voter-table-body').innerHTML = reg.slice().reverse().map(r => `
-                    <tr class="text-[10px] text-gray-400">
-                        <td class="px-6 py-4">${new Date(r.timestamp).toLocaleTimeString()}</td>
-                        <td class="px-6 py-4 font-bold text-white uppercase tracking-wider">${r.voterId}</td>
-                        <td class="px-6 py-4 font-mono text-gray-300 italic">${r.adNo}</td>
+                const tableBody = document.getElementById('voter-table-body');
+                
+                // Important: Show ALL records (no slice(0, 4)) in reverse chronological order
+                tableBody.innerHTML = reg.slice().reverse().map(r => `
+                    <tr class="text-[10px] text-gray-400 border-b border-white/5">
+                        <td class="px-6 py-4">${new Date(r.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'})}</td>
+                        <td class="px-6 py-4 font-bold text-white uppercase tracking-wider">${r.voterId || 'SYSTEM_NODE'}</td>
+                        <td class="px-6 py-4 font-mono text-brand-purple">${r.adNo || '---'}</td>
                         <td class="px-6 py-4">
-                            <span class="px-2 py-1 rounded bg-green-500/10 text-green-400 font-bold uppercase text-[8px]">Stored Securely</span>
+                            <div class="flex items-center gap-2">
+                                <div class="w-1 h-1 rounded-full bg-green-500"></div>
+                                <span class="text-green-400 font-bold uppercase text-[8px]">Verified</span>
+                            </div>
                         </td>
                     </tr>
                 `).join('');
+                
+                if (reg.length === 0) {
+                    tableBody.innerHTML = '<tr><td colspan="4" class="text-center py-10 text-gray-500 italic">No ballot history found.</td></tr>';
+                }
             },
 
-            clearData: function() { if(confirm("Permanently clear all local election data?")) { localStorage.clear(); location.reload(); } }
+            clearData: function() { 
+                if(confirm("Permanently clear ALL local election data and registry? This cannot be undone.")) { 
+                    localStorage.removeItem('linguo_votes');
+                    localStorage.removeItem('linguo_registry');
+                    location.reload(); 
+                } 
+            }
         };
 
         window.onload = () => app.init();
