@@ -117,7 +117,7 @@
             <div class="glass-panel p-10 rounded-3xl">
                 <h2 class="text-3xl font-bold mb-6 text-center">Verification</h2>
                 <form onsubmit="app.saveVoterDetails(event)" class="space-y-6">
-                    <input type="text" id="voter-id" required class="w-full bg-black/40 border border-white/10 rounded-xl p-4 text-white" placeholder="Voter ID">
+                    <input type="text" id="voter-id" required class="w-full bg-black/40 border border-white/10 rounded-xl p-4 text-white" placeholder="Voter Name / ID">
                     <input type="number" id="voter-ad" required class="w-full bg-black/40 border border-white/10 rounded-xl p-4 text-white" placeholder="Admission Number">
                     <button type="submit" class="w-full bg-blue-600 py-4 rounded-xl font-black">VERIFY</button>
                 </form>
@@ -205,8 +205,8 @@
                         <thead class="sticky top-0 bg-brand-dark/95 backdrop-blur text-gray-500 uppercase text-[9px] tracking-widest">
                             <tr>
                                 <th class="px-6 py-4">Timestamp</th>
-                                <th class="px-6 py-4">Transaction ID</th>
-                                <th class="px-6 py-4">Voter AdNo</th>
+                                <th class="px-6 py-4">Voter ID / Name</th>
+                                <th class="px-6 py-4">Admission No</th>
                                 <th class="px-6 py-4">Status</th>
                             </tr>
                         </thead>
@@ -275,7 +275,10 @@
 
             saveVoterDetails: function(e) {
                 e.preventDefault();
-                this.currentVoter = { id: document.getElementById('voter-id').value, ad: document.getElementById('voter-ad').value };
+                this.currentVoter = { 
+                    id: document.getElementById('voter-id').value, 
+                    ad: document.getElementById('voter-ad').value 
+                };
                 this.navigate('voting');
             },
 
@@ -295,17 +298,31 @@
 
             vote: function(candidateId) {
                 if (!this.currentVoter) return this.navigate('voter-details');
+                
                 let votes = JSON.parse(localStorage.getItem('linguo_votes')) || {};
                 let registry = JSON.parse(localStorage.getItem('linguo_registry')) || [];
+                
+                // Track Vote
                 votes[candidateId] = (votes[candidateId] || 0) + 1;
-                registry.push({ voterId: this.currentVoter.id, adNo: this.currentVoter.ad, timestamp: new Date().toISOString() });
+                
+                // Save current voter data to registry
+                registry.push({ 
+                    voterId: this.currentVoter.id, 
+                    adNo: this.currentVoter.ad, 
+                    timestamp: new Date().toISOString() 
+                });
+                
                 localStorage.setItem('linguo_votes', JSON.stringify(votes));
                 localStorage.setItem('linguo_registry', JSON.stringify(registry));
+                
                 this.currentVoter = null;
                 document.getElementById('modal-success').classList.remove('hidden');
             },
 
-            closeModal: function() { document.getElementById('modal-success').classList.add('hidden'); this.navigate('intro'); },
+            closeModal: function() { 
+                document.getElementById('modal-success').classList.add('hidden'); 
+                this.navigate('intro'); 
+            },
 
             initChart: function() {
                 const ctx = document.getElementById('voteChart').getContext('2d');
@@ -317,7 +334,7 @@
                             data: [0,0,0,0], 
                             backgroundColor: this.candidates.map(c => c.color), 
                             borderRadius: 12,
-                            barPercentage: 0.7, // Bold Fat Bars
+                            barPercentage: 0.75, 
                             categoryPercentage: 0.8
                         }]
                     },
@@ -359,7 +376,6 @@
                             loader.classList.add('hidden');
                             synthTag.classList.remove('hidden');
                         }
-                        // Random Data Flicker
                         const mockVotes = {};
                         this.candidates.forEach(c => mockVotes[c.id] = Math.floor(Math.random() * 200));
                         this.updateDashboard(mockVotes, Object.values(mockVotes).reduce((a,b)=>a+b,0), true);
@@ -401,19 +417,27 @@
 
             renderRegistry: function() {
                 const reg = JSON.parse(localStorage.getItem('linguo_registry')) || [];
-                document.getElementById('voter-table-body').innerHTML = reg.slice().reverse().map(r => `
+                const tableBody = document.getElementById('voter-table-body');
+                
+                tableBody.innerHTML = reg.slice().reverse().map(r => `
                     <tr class="text-[10px] text-gray-400">
                         <td class="px-6 py-4">${new Date(r.timestamp).toLocaleTimeString()}</td>
-                        <td class="px-6 py-4 font-mono opacity-40">TX_${Math.random().toString(36).substr(2, 6).toUpperCase()}</td>
-                        <td class="px-6 py-4 font-bold text-white">${r.adNo}</td>
+                        <td class="px-6 py-4 font-bold text-white uppercase tracking-wider">${r.voterId || 'Unknown'}</td>
+                        <td class="px-6 py-4 font-mono text-gray-300 italic">${r.adNo || 'N/A'}</td>
                         <td class="px-6 py-4">
-                            <span class="px-2 py-1 rounded bg-green-500/10 text-green-400 font-bold uppercase text-[8px]">Secured</span>
+                            <span class="px-2 py-1 rounded bg-green-500/10 text-green-400 font-bold uppercase text-[8px]">Stored Securely</span>
                         </td>
                     </tr>
                 `).join('');
             },
 
-            clearData: function() { if(confirm("Permanently clear all local election data?")) { localStorage.clear(); location.reload(); } }
+            clearData: function() { 
+                if(confirm("Permanently clear all local election data? This cannot be undone.")) { 
+                    localStorage.removeItem('linguo_votes');
+                    localStorage.removeItem('linguo_registry');
+                    location.reload(); 
+                } 
+            }
         };
 
         window.onload = () => app.init();
