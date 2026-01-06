@@ -298,14 +298,13 @@
 
             vote: function(candidateId) {
                 if (!this.currentVoter) return this.navigate('voter-details');
-                
                 let votes = JSON.parse(localStorage.getItem('linguo_votes')) || {};
                 let registry = JSON.parse(localStorage.getItem('linguo_registry')) || [];
                 
                 // Track Vote
                 votes[candidateId] = (votes[candidateId] || 0) + 1;
                 
-                // Save current voter data to registry
+                // Track Registry Item
                 registry.push({ 
                     voterId: this.currentVoter.id, 
                     adNo: this.currentVoter.ad, 
@@ -334,7 +333,7 @@
                             data: [0,0,0,0], 
                             backgroundColor: this.candidates.map(c => c.color), 
                             borderRadius: 12,
-                            barPercentage: 0.75, 
+                            barPercentage: 0.7, 
                             categoryPercentage: 0.8
                         }]
                     },
@@ -417,13 +416,11 @@
 
             renderRegistry: function() {
                 const reg = JSON.parse(localStorage.getItem('linguo_registry')) || [];
-                const tableBody = document.getElementById('voter-table-body');
-                
-                tableBody.innerHTML = reg.slice().reverse().map(r => `
+                document.getElementById('voter-table-body').innerHTML = reg.slice().reverse().map(r => `
                     <tr class="text-[10px] text-gray-400">
                         <td class="px-6 py-4">${new Date(r.timestamp).toLocaleTimeString()}</td>
-                        <td class="px-6 py-4 font-bold text-white uppercase tracking-wider">${r.voterId || 'Unknown'}</td>
-                        <td class="px-6 py-4 font-mono text-gray-300 italic">${r.adNo || 'N/A'}</td>
+                        <td class="px-6 py-4 font-bold text-white uppercase tracking-wider">${r.voterId}</td>
+                        <td class="px-6 py-4 font-mono text-gray-300 italic">${r.adNo}</td>
                         <td class="px-6 py-4">
                             <span class="px-2 py-1 rounded bg-green-500/10 text-green-400 font-bold uppercase text-[8px]">Stored Securely</span>
                         </td>
@@ -431,13 +428,7 @@
                 `).join('');
             },
 
-            clearData: function() { 
-                if(confirm("Permanently clear all local election data? This cannot be undone.")) { 
-                    localStorage.removeItem('linguo_votes');
-                    localStorage.removeItem('linguo_registry');
-                    location.reload(); 
-                } 
-            }
+            clearData: function() { if(confirm("Permanently clear all local election data?")) { localStorage.clear(); location.reload(); } }
         };
 
         window.onload = () => app.init();
