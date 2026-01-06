@@ -26,7 +26,6 @@
                     animation: {
                         'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
                         'spin-slow': 'spin 8s linear infinite',
-                        'float': 'float 6s ease-in-out infinite',
                     }
                 }
             }
@@ -63,27 +62,31 @@
             animation: gridMove 20s linear infinite;
         }
         @keyframes gridMove { from { background-position: 0 0; } to { background-position: 0 300px; } }
+
+        .custom-scroll::-webkit-scrollbar { width: 6px; }
+        .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
     </style>
 </head>
 <body class="antialiased selection:bg-brand-pink selection:text-white">
 
     <nav id="navbar" class="fixed top-0 w-full z-50 glass-panel border-b border-white/10 hidden-section">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16">
+            <div class="flex items-center justify-between h-14">
                 <div class="flex items-center gap-2 cursor-pointer" onclick="app.navigate('intro')">
-                    <i class="fa-solid fa-bolt text-yellow-400 text-2xl"></i>
-                    <span class="font-bold text-xl tracking-wider uppercase">Linguo<span class="text-yellow-400">Electro</span></span>
+                    <i class="fa-solid fa-bolt text-yellow-400 text-xl"></i>
+                    <span class="font-bold text-lg tracking-wider uppercase">Linguo<span class="text-yellow-400">Electro</span></span>
                 </div>
                 <div class="flex space-x-4">
-                    <button onclick="app.navigate('intro')" class="px-3 py-2 rounded-md text-sm font-medium hover:bg-white/10 transition-colors">Home</button>
-                    <button onclick="app.navigate('pre-results')" class="px-3 py-2 rounded-md text-sm font-medium bg-brand-purple hover:bg-brand-purple/80 transition-all">Analytics</button>
-                    <button onclick="app.logout()" class="px-3 py-2 rounded-md text-sm font-medium hover:text-red-400 transition-colors"><i class="fa-solid fa-power-off"></i></button>
+                    <button onclick="app.navigate('intro')" class="px-3 py-1.5 rounded-md text-xs font-medium hover:bg-white/10 transition-colors">Home</button>
+                    <button onclick="app.navigate('pre-results')" class="px-3 py-1.5 rounded-md text-xs font-medium bg-brand-purple hover:bg-brand-purple/80 transition-all">Analytics</button>
+                    <button onclick="app.logout()" class="px-3 py-1.5 rounded-md text-xs font-medium hover:text-red-400 transition-colors"><i class="fa-solid fa-power-off"></i></button>
                 </div>
             </div>
         </div>
     </nav>
 
-    <div class="relative min-h-screen flex items-center justify-center p-4 pt-20">
+    <div class="relative min-h-screen flex items-center justify-center p-4 pt-16">
         <!-- 1. LOGIN -->
         <section id="page-login" class="w-full max-w-md fade-in">
             <div class="glass-panel p-8 rounded-2xl text-center">
@@ -112,7 +115,7 @@
         <!-- 3. VOTER ID -->
         <section id="page-voter-details" class="w-full max-w-lg hidden-section fade-in">
             <div class="glass-panel p-10 rounded-3xl">
-                <h2 class="text-3xl font-bold mb-6">Verification</h2>
+                <h2 class="text-3xl font-bold mb-6 text-center">Verification</h2>
                 <form onsubmit="app.saveVoterDetails(event)" class="space-y-6">
                     <input type="text" id="voter-id" required class="w-full bg-black/40 border border-white/10 rounded-xl p-4 text-white" placeholder="Voter ID">
                     <input type="number" id="voter-ad" required class="w-full bg-black/40 border border-white/10 rounded-xl p-4 text-white" placeholder="Admission Number">
@@ -123,7 +126,7 @@
 
         <!-- 4. VOTING -->
         <section id="page-voting" class="w-full max-w-6xl hidden-section fade-in">
-            <div id="ballot-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8"></div>
+            <div id="ballot-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"></div>
         </section>
 
         <!-- 5. PRE-RESULTS -->
@@ -135,51 +138,81 @@
         </section>
 
         <!-- 6. ANALYTICS -->
-        <section id="page-results" class="w-full max-w-7xl hidden-section fade-in pb-20 relative">
+        <section id="page-results" class="w-full max-w-6xl hidden-section fade-in pb-10">
             <!-- 20-SEC LOADER LAYER -->
             <div id="result-loader" class="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#0f0c29] hidden">
                 <div id="loader-overlay" class="absolute inset-0 opacity-20 pointer-events-none"></div>
                 <div class="relative mb-12">
-                    <div class="w-48 h-48 border-2 border-white/5 rounded-full animate-spin-slow"></div>
+                    <div class="w-40 h-40 border-2 border-white/5 rounded-full animate-spin-slow"></div>
                     <div class="absolute inset-0 flex items-center justify-center">
-                        <i class="fa-solid fa-atom text-5xl text-brand-purple animate-pulse"></i>
+                        <i class="fa-solid fa-atom text-4xl text-brand-purple animate-pulse"></i>
                     </div>
                 </div>
-                <div class="text-center space-y-4 max-w-lg px-6">
-                    <h2 class="text-4xl font-black tracking-widest uppercase italic">PROCESSING BALLOTS</h2>
-                    <p class="text-brand-purple font-mono text-sm" id="loader-status">Verifying Ledger...</p>
-                    <div class="w-full h-1.5 bg-white/10 rounded-full mt-8 overflow-hidden">
-                        <div id="loader-bar" class="h-full bg-gradient-to-r from-brand-purple to-brand-pink transition-all duration-300" style="width: 0%"></div>
+                <div class="text-center space-y-4 max-w-md px-6">
+                    <h2 class="text-3xl font-black tracking-widest uppercase italic text-white">PROCESSING BALLOTS</h2>
+                    <p class="text-brand-purple font-mono text-xs" id="loader-status">Verifying Ledger...</p>
+                    <div class="w-full h-1 bg-white/10 rounded-full mt-6 overflow-hidden">
+                        <div id="loader-bar" class="h-full bg-gradient-to-r from-brand-purple to-brand-pink" style="width: 0%"></div>
                     </div>
                 </div>
             </div>
 
-            <!-- DASHBOARD UI -->
-            <div class="mb-12 flex justify-between items-end border-b border-white/10 pb-8">
+            <!-- DASHBOARD HEADER -->
+            <div class="mb-6 flex justify-between items-center bg-white/5 p-5 rounded-2xl border border-white/10">
                 <div>
-                    <h2 class="text-5xl font-black text-white">Election Intelligence</h2>
-                    <p id="synthesis-tag" class="text-brand-purple text-xs font-bold uppercase tracking-widest mt-2 hidden animate-pulse">Neural Synthesis Active...</p>
+                    <h2 class="text-3xl font-black text-white leading-tight">Election Intelligence</h2>
+                    <div id="synthesis-tag" class="text-brand-purple text-[11px] font-bold uppercase tracking-[0.2em] hidden animate-pulse mt-1">Neural Synthesis Active...</div>
                 </div>
-                <div class="bg-white/5 p-6 rounded-2xl border border-white/10 min-w-[200px]">
-                    <span class="text-gray-400 text-xs font-bold uppercase">Total Cast</span>
-                    <div class="text-4xl font-black text-white" id="total-votes-display">0</div>
+                <div class="text-right glass-card px-6 py-3 rounded-xl border-brand-purple/20">
+                    <span class="text-gray-400 text-[10px] font-bold uppercase tracking-wider block mb-1">Total Ballots Cast</span>
+                    <div class="text-3xl font-black text-white" id="total-votes-display">0</div>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div class="lg:col-span-2 glass-panel p-8 rounded-3xl min-h-[400px]">
-                    <canvas id="voteChart"></canvas>
+            <!-- MAIN ANALYTICS GRID -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <!-- Left Side: Graphs -->
+                <div class="lg:col-span-8 glass-panel p-8 rounded-3xl flex flex-col h-[450px]">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xs font-bold uppercase tracking-widest text-gray-400">Live Vote Distribution</h3>
+                        <div class="flex gap-2">
+                            <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+                            <span class="text-[9px] font-bold text-gray-500 uppercase">Live Node Stream</span>
+                        </div>
+                    </div>
+                    <div class="flex-grow relative">
+                        <canvas id="voteChart"></canvas>
+                    </div>
                 </div>
-                <div id="stats-cards-container" class="space-y-4"></div>
+
+                <!-- Right Side: Team Cards -->
+                <div class="lg:col-span-4 flex flex-col gap-4 h-[450px]">
+                    <h3 class="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 px-1">Standings</h3>
+                    <div id="stats-cards-container" class="flex flex-col gap-4 flex-grow">
+                        <!-- Rendered via JS -->
+                    </div>
+                </div>
             </div>
             
-            <div class="glass-panel rounded-3xl overflow-hidden mt-12">
-                <div class="p-8 border-b border-white/10">
-                    <h3 class="text-xl font-bold">Audit Registry</h3>
+            <!-- Bottom: Registry -->
+            <div class="glass-panel rounded-2xl overflow-hidden mt-6">
+                <div class="px-6 py-4 border-b border-white/10 flex justify-between items-center bg-white/5">
+                    <h3 class="text-sm font-bold uppercase tracking-widest text-white/80 italic">Verified Audit Registry</h3>
+                    <button onclick="app.clearData()" class="text-[9px] text-red-500/30 hover:text-red-500 font-bold uppercase transition-colors">Emergency Clear</button>
                 </div>
-                <table class="w-full text-left">
-                    <tbody id="voter-table-body" class="divide-y divide-white/5"></tbody>
-                </table>
+                <div class="max-h-[250px] overflow-y-auto custom-scroll">
+                    <table class="w-full text-left text-xs">
+                        <thead class="sticky top-0 bg-brand-dark/95 backdrop-blur text-gray-500 uppercase text-[9px] tracking-widest">
+                            <tr>
+                                <th class="px-6 py-4">Timestamp</th>
+                                <th class="px-6 py-4">Transaction ID</th>
+                                <th class="px-6 py-4">Voter AdNo</th>
+                                <th class="px-6 py-4">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="voter-table-body" class="divide-y divide-white/5 bg-white/[0.02]"></tbody>
+                    </table>
+                </div>
             </div>
         </section>
     </div>
@@ -187,20 +220,20 @@
     <!-- Modal Success -->
     <div id="modal-success" class="fixed inset-0 z-[200] flex items-center justify-center hidden">
         <div class="absolute inset-0 bg-black/90 backdrop-blur-xl" onclick="app.closeModal()"></div>
-        <div class="relative glass-panel p-12 rounded-[40px] text-center max-w-sm w-full">
+        <div class="relative glass-panel p-10 rounded-[40px] text-center max-w-sm w-full">
             <i class="fa-solid fa-circle-check text-6xl text-green-500 mb-6"></i>
-            <h3 class="text-2xl font-black text-white mb-8">BALLOT ENCRYPTED</h3>
-            <button onclick="app.closeModal()" class="w-full bg-green-600 text-white font-black py-4 rounded-xl">FINISH</button>
+            <h3 class="text-2xl font-black text-white mb-8 italic uppercase tracking-tighter">Ballot Encrypted</h3>
+            <button onclick="app.closeModal()" class="w-full bg-white text-black font-black py-4 rounded-xl hover:scale-105 transition-transform">BACK TO HOME</button>
         </div>
     </div>
 
     <script>
         const app = {
             candidates: [
-                { id: 'sinan', name: 'Sinan K', icon: 'fa-fire-extinguisher', symbol: 'Gas Cylinder', color: '#ef4444' },
-                { id: 'jalal', name: 'Jalal', icon: 'fa-mobile-screen-button', symbol: 'Mobile Phone', color: '#3b82f6' },
+                { id: 'sinan', name: 'Sinan K', icon: 'fa-fire-extinguisher', symbol: 'Cylinder', color: '#ef4444' },
+                { id: 'jalal', name: 'Jalal', icon: 'fa-mobile-screen-button', symbol: 'Phone', color: '#3b82f6' },
                 { id: 'rayyan', name: 'Rayyan', icon: 'fa-futbol', symbol: 'Football', color: '#10b981' },
-                { id: 'ameer', name: 'Ameer Ali', icon: 'fa-cube', symbol: "Rubik's Cube", color: '#f59e0b' }
+                { id: 'ameer', name: 'Ameer Ali', icon: 'fa-cube', symbol: "Cube", color: '#f59e0b' }
             ],
             currentVoter: null,
             chartInstance: null,
@@ -218,8 +251,7 @@
                 }
                 this.showSection(pageId);
                 const nav = document.getElementById('navbar');
-                if (pageId === 'login') nav.classList.add('hidden-section');
-                else nav.classList.remove('hidden-section');
+                pageId === 'login' ? nav.classList.add('hidden-section') : nav.classList.remove('hidden-section');
             },
 
             showSection: function(id) {
@@ -250,13 +282,13 @@
             renderCandidates: function() {
                 const container = document.getElementById('ballot-container');
                 container.innerHTML = this.candidates.map(c => `
-                    <div class="glass-card rounded-[32px] p-8 text-center">
-                        <div class="w-24 h-24 rounded-3xl bg-white/5 flex items-center justify-center mx-auto mb-6 border border-white/10">
-                            <i class="${c.icon} text-4xl"></i>
+                    <div class="glass-card rounded-[32px] p-8 text-center border-white/10 hover:border-white/30">
+                        <div class="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center mx-auto mb-4 border border-white/10">
+                            <i class="${c.icon} text-2xl text-white"></i>
                         </div>
-                        <h3 class="text-xl font-black mb-1">${c.name}</h3>
-                        <p class="text-xs text-gray-500 uppercase font-bold mb-8">${c.symbol}</p>
-                        <button onclick="app.vote('${c.id}')" class="w-full bg-white text-black font-black py-4 rounded-2xl active:scale-95 transition-all">SELECT</button>
+                        <h3 class="text-lg font-black mb-1">${c.name}</h3>
+                        <p class="text-[9px] text-gray-500 uppercase font-bold mb-6 tracking-widest">${c.symbol}</p>
+                        <button onclick="app.vote('${c.id}')" class="w-full bg-white text-black font-black py-3 rounded-xl active:scale-95 transition-all text-sm uppercase">Cast Vote</button>
                     </div>
                 `).join('');
             },
@@ -281,13 +313,22 @@
                     type: 'bar',
                     data: {
                         labels: this.candidates.map(c => c.name),
-                        datasets: [{ data: [0,0,0,0], backgroundColor: this.candidates.map(c => c.color), borderRadius: 10 }]
+                        datasets: [{ 
+                            data: [0,0,0,0], 
+                            backgroundColor: this.candidates.map(c => c.color), 
+                            borderRadius: 12,
+                            barPercentage: 0.7, // Bold Fat Bars
+                            categoryPercentage: 0.8
+                        }]
                     },
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
                         plugins: { legend: { display: false } },
-                        scales: { y: { display: false }, x: { ticks: { color: '#64748b', font: { weight: 'bold' } }, grid: { display: false } } }
+                        scales: { 
+                            y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { display: false }, border: { display: false } }, 
+                            x: { ticks: { color: '#94a3b8', font: { weight: '800', size: 12 } }, grid: { display: false } } 
+                        }
                     }
                 });
             },
@@ -301,84 +342,78 @@
                 
                 loader.classList.remove('hidden');
                 
-                const STAGE_1_TIME = 20000;
-                const STAGE_2_TIME = 10000;
+                const PHASE_1 = 20000;
+                const PHASE_2 = 10000;
                 const startTime = Date.now();
-
-                const msgs = ["Decrypting nodes...", "Hashing ballots...", "Syncing ledger...", "Validating..."];
+                const msgs = ["Decrypting nodes...", "Syncing ledger...", "Hashing ballots...", "Finalizing results..."];
 
                 const interval = setInterval(() => {
                     const elapsed = Date.now() - startTime;
                     
-                    if (elapsed < STAGE_1_TIME) {
-                        // PHASE 1: FULL SCREEN LOADER
-                        const progress = (elapsed / STAGE_1_TIME) * 100;
-                        bar.style.width = progress + '%';
-                        status.innerText = msgs[Math.floor((elapsed/STAGE_1_TIME) * msgs.length)];
+                    if (elapsed < PHASE_1) {
+                        bar.style.width = (elapsed / PHASE_1) * 100 + '%';
+                        status.innerText = msgs[Math.floor((elapsed/PHASE_1) * msgs.length)];
                     } 
-                    else if (elapsed < (STAGE_1_TIME + STAGE_2_TIME)) {
-                        // PHASE 2: LIVE SYNTHESIS ON DASHBOARD
+                    else if (elapsed < (PHASE_1 + PHASE_2)) {
                         if (!loader.classList.contains('hidden')) {
                             loader.classList.add('hidden');
                             synthTag.classList.remove('hidden');
                         }
-
-                        // Fluctuating Random Data
+                        // Random Data Flicker
                         const mockVotes = {};
-                        this.candidates.forEach(c => mockVotes[c.id] = Math.floor(Math.random() * 99));
-                        const mockTotal = Object.values(mockVotes).reduce((a,b) => a+b, 0);
-                        
-                        this.updateDashboard(mockVotes, mockTotal, true);
+                        this.candidates.forEach(c => mockVotes[c.id] = Math.floor(Math.random() * 200));
+                        this.updateDashboard(mockVotes, Object.values(mockVotes).reduce((a,b)=>a+b,0), true);
                     } 
                     else {
-                        // FINAL: LOCK IN REAL RESULTS
                         clearInterval(interval);
                         synthTag.classList.add('hidden');
                         const realVotes = JSON.parse(localStorage.getItem('linguo_votes')) || {};
-                        const realTotal = Object.values(realVotes).reduce((a,b) => a+b, 0);
-                        this.updateDashboard(realVotes, realTotal, false);
+                        this.updateDashboard(realVotes, Object.values(realVotes).reduce((a,b)=>a+b,0), false);
                         this.renderRegistry();
                     }
-                }, 80);
+                }, 100);
             },
 
             updateDashboard: function(votes, total, isMock) {
-                // Update Numbers
                 document.getElementById('total-votes-display').innerText = total;
-
-                // Update Chart
                 this.chartInstance.data.datasets[0].data = this.candidates.map(c => votes[c.id] || 0);
                 this.chartInstance.update(isMock ? 'none' : 'default');
 
-                // Update Cards
                 const container = document.getElementById('stats-cards-container');
                 container.innerHTML = this.candidates
                     .map(c => ({...c, val: votes[c.id] || 0}))
                     .sort((a,b) => b.val - a.val)
                     .map(c => `
-                        <div class="glass-card p-4 rounded-xl flex justify-between items-center ${isMock ? 'animate-pulse' : ''}">
-                            <div class="flex items-center gap-3">
-                                <div class="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center"><i class="${c.icon} text-sm"></i></div>
-                                <span class="font-bold text-sm">${c.name}</span>
+                        <div class="glass-card p-4 rounded-2xl flex justify-between items-center transition-all ${isMock ? 'scale-[0.98] opacity-70' : 'scale-100'}">
+                            <div class="flex items-center gap-4">
+                                <div class="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center border border-white/10">
+                                    <i class="${c.icon} text-sm"></i>
+                                </div>
+                                <div class="flex flex-col">
+                                    <span class="font-bold text-sm text-white">${c.name}</span>
+                                    <span class="text-[9px] uppercase tracking-widest text-gray-500 font-bold">${c.symbol}</span>
+                                </div>
                             </div>
-                            <span class="text-xl font-black" style="color: ${c.color}">${c.val}</span>
+                            <span class="text-2xl font-black italic" style="color: ${c.color}">${c.val}</span>
                         </div>
                     `).join('');
             },
 
             renderRegistry: function() {
-                const registry = JSON.parse(localStorage.getItem('linguo_registry')) || [];
-                document.getElementById('voter-table-body').innerHTML = registry.slice().reverse().map(r => `
-                    <tr class="text-xs text-gray-400">
-                        <td class="p-6">${new Date(r.timestamp).toLocaleTimeString()}</td>
-                        <td class="p-6 font-mono opacity-50">NODE_${Math.random().toString(36).substr(2, 5).toUpperCase()}</td>
-                        <td class="p-6 font-bold text-white">${r.adNo}</td>
-                        <td class="p-6 text-green-500 font-bold tracking-widest uppercase">Verified</td>
+                const reg = JSON.parse(localStorage.getItem('linguo_registry')) || [];
+                document.getElementById('voter-table-body').innerHTML = reg.slice().reverse().map(r => `
+                    <tr class="text-[10px] text-gray-400">
+                        <td class="px-6 py-4">${new Date(r.timestamp).toLocaleTimeString()}</td>
+                        <td class="px-6 py-4 font-mono opacity-40">TX_${Math.random().toString(36).substr(2, 6).toUpperCase()}</td>
+                        <td class="px-6 py-4 font-bold text-white">${r.adNo}</td>
+                        <td class="px-6 py-4">
+                            <span class="px-2 py-1 rounded bg-green-500/10 text-green-400 font-bold uppercase text-[8px]">Secured</span>
+                        </td>
                     </tr>
                 `).join('');
             },
 
-            clearData: function() { if(confirm("Reset?")) { localStorage.clear(); location.reload(); } }
+            clearData: function() { if(confirm("Permanently clear all local election data?")) { localStorage.clear(); location.reload(); } }
         };
 
         window.onload = () => app.init();
